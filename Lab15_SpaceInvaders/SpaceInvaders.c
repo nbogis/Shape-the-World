@@ -73,12 +73,23 @@
 #include "Random.h"
 #include "TExaS.h"
 
+// ***** 2. Global Declarations Section *****
+
+// FUNCTION PROTOTYPES: Each subroutine defined
 void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
+void PORTS_Init(void);
+void DAC_Init(void);
+void Check_Fire(volatile unsigned long Normal_Fire, volatile unsigned long Special_Fire);
 void Timer2_Init(unsigned long period);
 void Delay100ms(unsigned long count); // time delay in 0.1 seconds
+void Delayms(unsigned long ms);
+volatile unsigned long Normal_Fire;
+volatile unsigned long Special_Fire;
 unsigned long TimerCount;
 unsigned long Semaphore;
+unsigned int i;
+unsigned int Index = 0;
 
 
 // *************************** Images ***************************
@@ -285,7 +296,11 @@ const unsigned char Laser1[] = {
  0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x80, 0x00, 0x00, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x80, 0x00, 0x00, 0x80, 0x80, 0x80, 0x00, 0xC0, 0xC0, 0xC0, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF,
  0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
-
+	
+// sound for shooting normal missile shoot[4080]
+unsigned char shoot[] = {8,6,6,10,13,8,2,6,12,7,3,5,8,13,9,4,5,9,11,6,4,8,12,8,3,6,7,12,10,4,5,8};
+// sound got shooting special missile lowpitch[25805]
+unsigned char lowpitch[] = {1,4,8,11,13,14,13,13,10,6,2,1,0,1,4,8,11,13,14,14,13,10,6,3,1,0,1,4,8,11,13,14,14,13};
 // *************************** Capture image dimensions out of BMP**********
 #define BUNKERW     ((unsigned char)Bunker0[18])
 #define BUNKERH     ((unsigned char)Bunker0[22])
@@ -304,30 +319,113 @@ const unsigned char Laser1[] = {
 #define PLAYERW     ((unsigned char)PlayerShip0[18])
 #define PLAYERH     ((unsigned char)PlayerShip0[22])
 	 
-int i;
-
 int main (void){
-	  TExaS_Init(SSI0_Real_Nokia5110_Scope);  // set system clock to 80 MHz
-	  Random_Init(1);
-	  Nokia5110_Init();
-	  Nokia5110_ClearBuffer();
-		Nokia5110_DisplayBuffer();      // draw buffer
-	
-	//Nokia5110_PrintBMP(unsigned char xpos, unsigned char ypos, const unsigned char *ptr, unsigned char threshold)
-	  Nokia5110_PrintBMP(32, 47, PlayerShipNew, 0); // player ship middle bottom
-		Nokia5110_PrintBMP(0, ENEMY10H - 1, SmallEnemyNew1, 0);
-	  Nokia5110_PrintBMP(20, 38, heart, 0);
+	TExaS_Init(SSI0_Real_Nokia5110_Scope);  // set system clock to 80 MHz
+	PORTS_Init();
+	DAC_Init();
+	Nokia5110_Init();
+	Timer2_Init(7256);							// initiate Timer 2 at 11kHz
+	EnableInterrupts();
+	/*	Random_Init(1);
+	Nokia5110_Init();
+	Nokia5110_ClearBuffer();
+	Nokia5110_DisplayBuffer();      // draw buffer
 
-	  Nokia5110_DisplayBuffer();     // draw buffer
-
-		Delay100ms(5);              // delay 0.5 sec at 5 MHz
-	  for (i=0;i<40;i=i+5){
+// Nokia5110_PrintBMP(unsigned char xpos, unsigned char ypos, const unsigned char *ptr, unsigned char threshold)
+	Nokia5110_PrintBMP(32, 47, PlayerShipNew, 0); // player ship middle bottom
+	Nokia5110_PrintBMP(0, ENEMY10H - 1, SmallEnemyNew1, 0);
+	Nokia5110_PrintBMP(20, 38, heart, 0);
+	Nokia5110_DisplayBuffer();     // draw buffer */
+	while(1){
+		Normal_Fire = GPIO_PORTE_DATA_R & 0x01;
+		Special_Fire = GPIO_PORTE_DATA_R & 0x02;
+		Check_Fire(Normal_Fire,Special_Fire);
+		
+	/*	Delay100ms(5);              // delay 0.5 sec at 5 MHz
+		for (i=0;i<40;i=i+5){
 			Nokia5110_ClearBuffer();
 			Nokia5110_PrintBMP(0+i, ENEMY10H - 1, SmallEnemyNew1, 0);
-	    Nokia5110_PrintBMP(20+i, 38, heart, 0);
-			Nokia5110_DisplayBuffer();     // draw buffer
+			Nokia5110_PrintBMP(20+i, 38, heart, 0);
+			Nokia5110_DisplayBuffer();  // draw buffer
 			Delay100ms(1);					
-		}
+		}*/
+	}
+}
+
+// **************PORTS_Init*********************
+// Subroutine to initialize port E for the switches (used to fire weapons) and port B for the LEDs (used to fire indication)
+// PE0 and PE1 are inputs, and PB4 and PB5 are outputs
+// Inputs: None
+// Output: None
+// Notes: PE0 is used to fire normal weapon which toggles PB4 while PE1 is for firing the special weapon that toggles PB5
+void PORTS_Init(void){
+	volatile unsigned long delay;
+	
+	SYSCTL_RCGC2_R |= 0x00000012;			// 1) enable port E and B clock
+	delay = SYSCTL_RCGC2_R; 					// delay
+	
+	// port E initialization
+	GPIO_PORTE_AMSEL_R &= ~0x03;			// 2) disable analog function 
+	GPIO_PORTE_PCTL_R	&= ~0x000000FF;	// 3) PCTL GPIO on PE0 and PE1 (to select regular digital function)
+	GPIO_PORTE_DIR_R &= ~0x03; 				// 4) set PE0 and PE1 as inputs
+	GPIO_PORTE_AFSEL_R &= ~0x03; 			// 5) clear bits in alternate function
+	GPIO_PORTE_DEN_R |= 0x03;					// 6) enable digital pins PE0 and PE1
+	
+	// port B initialization
+	GPIO_PORTB_AMSEL_R = 0x00;				// 2) disable analog function
+	GPIO_PORTB_PCTL_R	= 0x00000000;		// 3) PCTL GPIO on PB4 and PB5 (to select reular digital function)
+	GPIO_PORTB_DIR_R |= 0x30; 				// 4) set PB4 and PB5 as outputs
+	GPIO_PORTB_AFSEL_R = 0x00; 				// 5) clear bits in alternate function
+	GPIO_PORTB_DEN_R |= 0x30;					// 6) enable digital pins PB4 and PB5
+}
+
+// **************Check_Fire*********************
+// Subroutine to check if the player is firing the missles
+// Inputs: Normal_Fire and Special_Fire are variables for type of missles
+// Output: None
+// Notes: if player is shooting the normal missle (PE0), normal LED (PB4) toggle
+// 				if player is shooting the special missle (PE1), special LED (PB5)toggle
+void Check_Fire(volatile unsigned long Normal_Fire,volatile unsigned long Special_Fire){
+	Nokia5110_ClearBuffer();
+/*	Delayms(100);	// delay of 100ms
+	if (Normal_Fire == 0x01) {	// if switch (PE0) is pressed
+		GPIO_PORTB_DATA_R ^= 0x10;	// toggle PB4
+		Nokia5110_PrintBMP(10, 10, Missile0, 1);
+	}
+	else if(Special_Fire == 0x02){	// if switch(PE1) is pressed
+		GPIO_PORTB_DATA_R ^= 0x20;	// toggle PB5
+		Nokia5110_PrintBMP(10, 10, Laser0, 1);
+	}
+	else{
+		GPIO_PORTB_DATA_R = 0x00;
+	}
+	Nokia5110_DisplayBuffer();     // draw buffer	*/
+}
+
+// **************DAC_Init*********************
+// Subroutine to initialize a 4-bit DAC to make sounds
+// Inputs: None
+// Output: None
+// Notes: The DAC uses the ports PB0-3
+// 				This subroutine runs at 11kHz interrupt
+void DAC_Init(void){
+	unsigned long volatile delay;
+	SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOB;	// activiate clock on port B
+	delay = SYSCTL_RCGC2_R;
+	GPIO_PORTB_AMSEL_R = ~0x0F;						// disable analog function on PB3-0
+	GPIO_PORTB_PCTL_R = ~0x0000FFFF;			// enable digital function on PB3-0
+	GPIO_PORTB_DR8R_R |= 0x0F;						// enable 8mA drive on PB3-0
+	GPIO_PORTB_DIR_R |= 0x0F;						  // make PB3-0 outputs
+	GPIO_PORTB_AFSEL_R &= ~0x0F;					// diable alternate function (enable regular function) on PB3-0
+	GPIO_PORTB_DEN_R |= 0x0F;							// enable digital port
+}
+
+// **************DAC_Out*********************
+// output to DAC
+// Input: 4-bit data, 0 to 15 
+// Output: none
+void DAC_Out(unsigned long data){
+	GPIO_PORTB_DATA_R = data;						// output data to DAC
 }
 
 // module that implement the move of the objects
@@ -370,14 +468,17 @@ int main (void){
 
 //}
 
-
-// You can use this timer only if you learn how it works
+// **************Timer2_Init*********************
+// Timer to play sounds
+// Input: period (the divider for the frequency
+// Output: None
+// Note: this timer has the highest priority 
 void Timer2_Init(unsigned long period){ 
   unsigned long volatile delay;
   SYSCTL_RCGCTIMER_R |= 0x04;   // 0) activate timer2
   delay = SYSCTL_RCGCTIMER_R;
   TimerCount = 0;
-  Semaphore = 0;
+  Semaphore = 0;								// set Semaphore evey interrupt
   TIMER2_CTL_R = 0x00000000;    // 1) disable timer2A during setup
   TIMER2_CFG_R = 0x00000000;    // 2) configure for 32-bit mode
   TIMER2_TAMR_R = 0x00000002;   // 3) configure for periodic mode, default down-count settings
@@ -385,16 +486,34 @@ void Timer2_Init(unsigned long period){
   TIMER2_TAPR_R = 0;            // 5) bus clock resolution
   TIMER2_ICR_R = 0x00000001;    // 6) clear timer2A timeout flag
   TIMER2_IMR_R = 0x00000001;    // 7) arm timeout interrupt
-  NVIC_PRI5_R = (NVIC_PRI5_R&0x00FFFFFF)|0x80000000; // 8) priority 4
+  NVIC_PRI5_R = (NVIC_PRI5_R&0x00FFFFFF)|0x10000000; // 8) priority 0
 // interrupts enabled in the main program after all devices initialized
 // vector number 39, interrupt number 23
   NVIC_EN0_R = 1<<23;           // 9) enable IRQ 23 in NVIC
   TIMER2_CTL_R = 0x00000001;    // 10) enable timer2A
 }
+
+// **************Timer2_Handler*********************
+// Handler to handle timer events
+// Input: None
+// Output: None
+// Note: 
 void Timer2A_Handler(void){ 
-  TIMER2_ICR_R = 0x00000001;   // acknowledge timer2A timeout
+  TIMER2_ICR_R = 0x00000001;   	// acknowledge timer2A timeout
   TimerCount++;
   Semaphore = 1; // trigger
+	if (Normal_Fire == 0x01) {	// if switch (PE0) is pressed
+		GPIO_PORTB_DATA_R ^= 0x10;	// toggle PB4
+		Nokia5110_PrintBMP(10, 10, Missile0, 1);
+	}
+	else if (Special_Fire == 0x02){
+		Index = (Index+1)&0x2F;		// index to cycle over sin wave (0x1F would cycle over the 32 table)
+		DAC_Out(lowpitch[Index]);		// output the sine wave value to DAC
+		GPIO_PORTB_DATA_R ^= 0x20;	// toggle PB5
+	}
+	else{
+		GPIO_PORTB_DATA_R = 0x00;
+	}
 }
 void Delay100ms(unsigned long count){unsigned long volatile time;
   while(count>0){
@@ -404,4 +523,19 @@ void Delay100ms(unsigned long count){unsigned long volatile time;
     }
     count--;
   }
+}
+
+// Subroutine to add a delay
+// Inputs: number of 1ms delays
+// Output: None
+// Notes: assumes 80 MHz clock
+void Delayms(unsigned long ms){
+	unsigned long delay;
+	while (ms>0){
+		delay = 16000;
+		while (delay > 0){
+			delay -= 1;
+		}
+		ms -= 1;
+	}
 }
