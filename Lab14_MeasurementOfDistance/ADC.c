@@ -34,7 +34,7 @@ void ADC0_Init(void){
 	volatile unsigned long delay;
 	SYSCTL_RCGC2_R |= 0x00000010;			// activate clock on port E
 	delay = SYSCTL_RCGC2_R;	
-	GPIO_PORTE_DIR_R = ~0x04;					// make PE2 input (channel 1)
+	GPIO_PORTE_DIR_R &= ~0x04;					// make PE2 input (channel 1)
 	GPIO_PORTE_AMSEL_R |= 0x04; 			// enable analog function on PE2
 	GPIO_PORTE_AFSEL_R |= 0x04;				// enable alternate function on PE2
 	GPIO_PORTE_DEN_R &= ~0x04;				// disable digital I/O on PE2
@@ -44,10 +44,11 @@ void ADC0_Init(void){
 	delay = SYSCTL_RCGC0_R;
 	SYSCTL_RCGC0_R &= ~0x00000300;		// configure for 125k
 	ADC0_SSPRI_R = 0x0123;						// make sequencer 3 the highest proprity
-	ADC0_ACTSS_R |= ~0x0008;					// disable seq 3
-	ADC0_EMUX_R &= 0x0FFF;						// set bit 15-12 for software trigger (seq3)
+	ADC0_ACTSS_R &= ~0x0008;					// disable seq 3
+	ADC0_EMUX_R &= ~0xF000;						// set bit 15-12 for software trigger (seq3)
 	ADC0_SSMUX3_R &= ~0x000F;					// clear SS3 field
 	ADC0_SSMUX3_R += 1;								// set channel 1 (Ain1 = PE2)
+	// ADC0_SSMUX3_R += 7;	 for channel 8
 	ADC0_SSCTL3_R = 0x0006;						// TS0 = 0 measure analog voltage on PE2 (ADC analog input pin)
 																		// IE0 = 1 to set INR3 flag in ADC0_RIS_R when ADC conversion completes
 																		// END0 = 1 this sample is the end of the sequence
@@ -63,8 +64,8 @@ void ADC0_Init(void){
 unsigned long ADC0_In(void){  
 	unsigned long result;
 	ADC0_PSSI_R = 0x0008;							// initiate SS3
-	while ((ADC0_RIS_R&0x08)==0){};
-	result = ADC0_SSFIFO3_R&0xFFF;		// read result
-	ADC0_ISC_R = 0x0008;							// clear RIS by clearing bit 3 in ISC	
-  return result; 												// return result
+	while ((ADC0_RIS_R&0x08)==0){};		// wait until flag is set
+	result = ADC0_SSFIFO3_R&0xFFF;		//  read result from FIFO of sequencer 3
+	ADC0_ISC_R = 0x0008;							// clear RIS by clearing bit 3 in ISC	to acknowledge completion
+  return result; 										// return result
 }

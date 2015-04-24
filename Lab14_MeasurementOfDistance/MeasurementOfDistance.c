@@ -52,9 +52,11 @@ unsigned long Flag;       // 1 means valid Distance, 0 means Distance is empty
 // Output: 32-bit distance (resolution 0.001cm)
 unsigned long Convert(unsigned long sample){
 	unsigned long distance;
-	distance = ((unsigned long)(sample * 500.3))>>10;				// asuming B = 0
-																													// we calibrate a and found it to be 0.5-0.6
-  return distance; 
+	distance = (((unsigned long)(sample * 1700.3))>>10)+ 250;		// calibration was very tough with the pot.
+//	I would work on whatever value I have and develop the argument accordingly  
+	//distance = (((unsigned long)(545*sample))>>10) + 583;		  // we calibrate a and found it to be 0.5-0.6
+ // distance = (((unsigned long)(2345*sample))>>10) + 383;		// we calibrate a and found it to be 0.5-0.6
+	return distance; 
 }
 
 // Initialize SysTick interrupts to trigger at 40 Hz, 25 ms
@@ -70,7 +72,7 @@ void SysTick_Init(unsigned long period){
 void SysTick_Handler(void){ 
 	GPIO_PORTF_DATA_R ^= 0x02;			// toggle PF1
 	GPIO_PORTF_DATA_R ^= 0x02;			// toggle PF1 again
-	ADCdata =ADC0_In();
+	ADCdata =ADC0_In();							// read ADC data from ADC0
 	Distance = Convert(ADCdata);
 	ADC0_ISC_R = 0x0004; 					// set flag in EMUX indicating new data is ready
 	GPIO_PORTF_DATA_R ^= 0x02;			// toggle PF1 again
@@ -188,11 +190,11 @@ void Delay1ms(unsigned long ms){
 }
 int main(void){
 	TExaS_Init(ADC0_AIN1_PIN_PE2, SSI0_Real_Nokia5110_NoScope);
-  ADC0_Init();    // initialize ADC0, channel 1, sequencer 3
+  ADC0_Init();    							// initialize ADC0, channel 1, sequencer 3
   Nokia5110_Init();             // initialize Nokia5110 LCD
 	SysTick_Init(2000000);				// initialize SysTick timer, every 0.25 ms
 
-	// port F initialization
+	// port F initialization for SW1
 	SYSCTL_RCGC2_R |= 0x00000020;	// activate clock on port F
 	GPIO_PORTF_AMSEL_R &= ~0x02;	// disable analog function on PF1
 	GPIO_PORTF_PCTL_R &= ~0x02;		// clear PCTL bit for regular digital function
@@ -200,10 +202,12 @@ int main(void){
 	GPIO_PORTF_AFSEL_R &= ~0x02;	// disble alterante function
 	GPIO_PORTF_DEN_R |= 0x02;			// enable digital I/O on PF1
 	EnableInterrupts();
+	
 	while(1){
 		ADC0_ISC_R = ~0x0004;				// clear flag
-		Delay1ms(1);								// wait for the flag to be set
+		Delay1ms(1000);								// wait for the flag to be cleared
 		UART_ConvertDistance(Distance);// convert the distance to display
+		Nokia5110_Clear();
 		Nokia5110_SetCursor(0, 0);	// set cursor to beginning
 		Nokia5110_OutString(String);// output the string Distance
 	}

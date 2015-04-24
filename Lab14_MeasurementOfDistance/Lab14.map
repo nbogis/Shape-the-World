@@ -29,6 +29,7 @@ Section Cross References
     measurementofdistance.o(i.main) refers to startup.o(.text) for EnableInterrupts
     measurementofdistance.o(i.main) refers to measurementofdistance.o(i.Delay1ms) for Delay1ms
     measurementofdistance.o(i.main) refers to measurementofdistance.o(i.UART_ConvertDistance) for UART_ConvertDistance
+    measurementofdistance.o(i.main) refers to nokia5110.o(i.Nokia5110_Clear) for Nokia5110_Clear
     measurementofdistance.o(i.main) refers to nokia5110.o(i.Nokia5110_SetCursor) for Nokia5110_SetCursor
     measurementofdistance.o(i.main) refers to nokia5110.o(i.Nokia5110_OutString) for Nokia5110_OutString
     measurementofdistance.o(i.main) refers to measurementofdistance.o(.data) for Distance
@@ -189,7 +190,6 @@ Section Cross References
 
 Removing Unused input sections from the image.
 
-    Removing nokia5110.o(i.Nokia5110_Clear), (32 bytes).
     Removing nokia5110.o(i.Nokia5110_DrawFullImage), (34 bytes).
     Removing nokia5110.o(i.Nokia5110_OutUDec), (412 bytes).
     Removing texas.o(i.Decrypt), (92 bytes).
@@ -204,7 +204,7 @@ Removing Unused input sections from the image.
     Removing texas.o(i.UART0_OutCharNonBlock), (12 bytes).
     Removing texas.o(i.copy), (18 bytes).
 
-14 unused section(s) (total 896 bytes) removed from the image.
+13 unused section(s) (total 864 bytes) removed from the image.
 
 ==============================================================================
 
@@ -215,51 +215,51 @@ Image Symbol Table
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
     RESET                                    0x00000000   Section      644  startup.o(RESET)
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
-    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
+    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtentry4.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  rtentry.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  rtentry.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
     ../clib/angel/scatter.s                  0x00000000   Number         0  __scatter.o ABSOLUTE
     ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
-    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
-    ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
+    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  no_argv.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
+    ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
     ../clib/heapalloc.c                      0x00000000   Number         0  hrguard.o ABSOLUTE
     ../clib/heapaux.c                        0x00000000   Number         0  heapauxi.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
     ../clib/signal.s                         0x00000000   Number         0  defsig.o ABSOLUTE
     ../clib/stdlib.c                         0x00000000   Number         0  exit.o ABSOLUTE
     ../fplib/dfixu.s                         0x00000000   Number         0  dfixu.o ABSOLUTE
@@ -328,41 +328,42 @@ Image Symbol Table
     .text                                    0x000003c2   Section        0  indicate_semi.o(.text)
     i.ADC0_In                                0x000003c4   Section        0  adc.o(i.ADC0_In)
     i.ADC0_Init                              0x000003f0   Section        0  adc.o(i.ADC0_Init)
-    i.ADC1_In                                0x000004c8   Section        0  texas.o(i.ADC1_In)
-    i.ADC1_Init                              0x000004d4   Section        0  texas.o(i.ADC1_Init)
-    i.Convert                                0x000005a8   Section        0  measurementofdistance.o(i.Convert)
-    i.Delay1ms                               0x000005d8   Section        0  measurementofdistance.o(i.Delay1ms)
-    i.Encrypt                                0x000005f0   Section        0  texas.o(i.Encrypt)
-    i.Nokia5110_Init                         0x0000065c   Section        0  nokia5110.o(i.Nokia5110_Init)
-    i.Nokia5110_OutChar                      0x000007c8   Section        0  nokia5110.o(i.Nokia5110_OutChar)
-    i.Nokia5110_OutString                    0x00000800   Section        0  nokia5110.o(i.Nokia5110_OutString)
-    i.Nokia5110_SetCursor                    0x00000816   Section        0  nokia5110.o(i.Nokia5110_SetCursor)
-    i.PLL_Init                               0x00000848   Section        0  texas.o(i.PLL_Init)
-    i.SetCode                                0x000008c4   Section        0  texas.o(i.SetCode)
-    i.SetCourse                              0x000008dc   Section        0  texas.o(i.SetCourse)
-    i.SetGrade                               0x000008f4   Section        0  texas.o(i.SetGrade)
-    i.SysTick_Handler                        0x000009c0   Section        0  measurementofdistance.o(i.SysTick_Handler)
-    i.SysTick_Init                           0x00000a20   Section        0  measurementofdistance.o(i.SysTick_Init)
-    i.TExaS_Init                             0x00000a50   Section        0  texas.o(i.TExaS_Init)
-    i.Timer4A_Handler                        0x00000ce0   Section        0  texas.o(i.Timer4A_Handler)
-    i.Timer5A_Handler                        0x00000d00   Section        0  texas.o(i.Timer5A_Handler)
-    i.UART0_Init                             0x00001580   Section        0  texas.o(i.UART0_Init)
-    i.UART_ConvertDistance                   0x00001640   Section        0  measurementofdistance.o(i.UART_ConvertDistance)
-    i.checkADCconfiguration                  0x00001764   Section        0  texas.o(i.checkADCconfiguration)
-    i.checkDisplayconfiguration              0x0000180c   Section        0  texas.o(i.checkDisplayconfiguration)
-    i.checkLinearity                         0x00001ab4   Section        0  texas.o(i.checkLinearity)
-    i.lcdwrite                               0x00001c58   Section        0  nokia5110.o(i.lcdwrite)
-    lcdwrite                                 0x00001c59   Thumb Code    66  nokia5110.o(i.lcdwrite)
-    i.main                                   0x00001ca4   Section        0  measurementofdistance.o(i.main)
-    x$fpl$dfixu                              0x00001d5c   Section       90  dfixu.o(x$fpl$dfixu)
-    x$fpl$dfltu                              0x00001db6   Section       38  dflt_clz.o(x$fpl$dfltu)
-    x$fpl$dmul                               0x00001ddc   Section      340  dmul.o(x$fpl$dmul)
-    x$fpl$dnaninf                            0x00001f30   Section      156  dnaninf.o(x$fpl$dnaninf)
-    x$fpl$dretinf                            0x00001fcc   Section       12  dretinf.o(x$fpl$dretinf)
-    .constdata                               0x00001fd8   Section      480  nokia5110.o(.constdata)
-    x$fpl$usenofp                            0x00001fd8   Section        0  usenofp.o(x$fpl$usenofp)
-    ASCII                                    0x00001fd8   Data         480  nokia5110.o(.constdata)
-    .constdata                               0x000021b8   Section     7056  texas.o(.constdata)
+    i.ADC1_In                                0x000004cc   Section        0  texas.o(i.ADC1_In)
+    i.ADC1_Init                              0x000004d8   Section        0  texas.o(i.ADC1_Init)
+    i.Convert                                0x000005ac   Section        0  measurementofdistance.o(i.Convert)
+    i.Delay1ms                               0x000005dc   Section        0  measurementofdistance.o(i.Delay1ms)
+    i.Encrypt                                0x000005f4   Section        0  texas.o(i.Encrypt)
+    i.Nokia5110_Clear                        0x00000660   Section        0  nokia5110.o(i.Nokia5110_Clear)
+    i.Nokia5110_Init                         0x00000680   Section        0  nokia5110.o(i.Nokia5110_Init)
+    i.Nokia5110_OutChar                      0x000007ec   Section        0  nokia5110.o(i.Nokia5110_OutChar)
+    i.Nokia5110_OutString                    0x00000824   Section        0  nokia5110.o(i.Nokia5110_OutString)
+    i.Nokia5110_SetCursor                    0x0000083a   Section        0  nokia5110.o(i.Nokia5110_SetCursor)
+    i.PLL_Init                               0x0000086c   Section        0  texas.o(i.PLL_Init)
+    i.SetCode                                0x000008e8   Section        0  texas.o(i.SetCode)
+    i.SetCourse                              0x00000900   Section        0  texas.o(i.SetCourse)
+    i.SetGrade                               0x00000918   Section        0  texas.o(i.SetGrade)
+    i.SysTick_Handler                        0x000009e4   Section        0  measurementofdistance.o(i.SysTick_Handler)
+    i.SysTick_Init                           0x00000a44   Section        0  measurementofdistance.o(i.SysTick_Init)
+    i.TExaS_Init                             0x00000a74   Section        0  texas.o(i.TExaS_Init)
+    i.Timer4A_Handler                        0x00000d04   Section        0  texas.o(i.Timer4A_Handler)
+    i.Timer5A_Handler                        0x00000d24   Section        0  texas.o(i.Timer5A_Handler)
+    i.UART0_Init                             0x000015a4   Section        0  texas.o(i.UART0_Init)
+    i.UART_ConvertDistance                   0x00001664   Section        0  measurementofdistance.o(i.UART_ConvertDistance)
+    i.checkADCconfiguration                  0x00001788   Section        0  texas.o(i.checkADCconfiguration)
+    i.checkDisplayconfiguration              0x00001830   Section        0  texas.o(i.checkDisplayconfiguration)
+    i.checkLinearity                         0x00001ad8   Section        0  texas.o(i.checkLinearity)
+    i.lcdwrite                               0x00001c7c   Section        0  nokia5110.o(i.lcdwrite)
+    lcdwrite                                 0x00001c7d   Thumb Code    66  nokia5110.o(i.lcdwrite)
+    i.main                                   0x00001cc8   Section        0  measurementofdistance.o(i.main)
+    x$fpl$dfixu                              0x00001d88   Section       90  dfixu.o(x$fpl$dfixu)
+    x$fpl$dfltu                              0x00001de2   Section       38  dflt_clz.o(x$fpl$dfltu)
+    x$fpl$dmul                               0x00001e08   Section      340  dmul.o(x$fpl$dmul)
+    x$fpl$dnaninf                            0x00001f5c   Section      156  dnaninf.o(x$fpl$dnaninf)
+    x$fpl$dretinf                            0x00001ff8   Section       12  dretinf.o(x$fpl$dretinf)
+    .constdata                               0x00002004   Section      480  nokia5110.o(.constdata)
+    x$fpl$usenofp                            0x00002004   Section        0  usenofp.o(x$fpl$usenofp)
+    ASCII                                    0x00002004   Data         480  nokia5110.o(.constdata)
+    .constdata                               0x000021e4   Section     7056  texas.o(.constdata)
     .data                                    0x20000000   Section       12  measurementofdistance.o(.data)
     .data                                    0x2000000c   Section      112  texas.o(.data)
     RealGrade                                0x2000001c   Data           4  texas.o(.data)
@@ -604,78 +605,79 @@ Image Symbol Table
     __use_no_semihosting_swi                 0x000003c1   Thumb Code     2  use_no_semi.o(.text)
     __semihosting_library_function           0x000003c3   Thumb Code     0  indicate_semi.o(.text)
     ADC0_In                                  0x000003c5   Thumb Code    36  adc.o(i.ADC0_In)
-    ADC0_Init                                0x000003f1   Thumb Code   180  adc.o(i.ADC0_Init)
-    ADC1_In                                  0x000004c9   Thumb Code     6  texas.o(i.ADC1_In)
-    ADC1_Init                                0x000004d5   Thumb Code   174  texas.o(i.ADC1_Init)
-    Convert                                  0x000005a9   Thumb Code    38  measurementofdistance.o(i.Convert)
-    Delay1ms                                 0x000005d9   Thumb Code    22  measurementofdistance.o(i.Delay1ms)
-    Encrypt                                  0x000005f1   Thumb Code    92  texas.o(i.Encrypt)
-    Nokia5110_Init                           0x0000065d   Thumb Code   316  nokia5110.o(i.Nokia5110_Init)
-    Nokia5110_OutChar                        0x000007c9   Thumb Code    52  nokia5110.o(i.Nokia5110_OutChar)
-    Nokia5110_OutString                      0x00000801   Thumb Code    22  nokia5110.o(i.Nokia5110_OutString)
-    Nokia5110_SetCursor                      0x00000817   Thumb Code    48  nokia5110.o(i.Nokia5110_SetCursor)
-    PLL_Init                                 0x00000849   Thumb Code   118  texas.o(i.PLL_Init)
-    SetCode                                  0x000008c5   Thumb Code    20  texas.o(i.SetCode)
-    SetCourse                                0x000008dd   Thumb Code    20  texas.o(i.SetCourse)
-    SetGrade                                 0x000008f5   Thumb Code   196  texas.o(i.SetGrade)
-    SysTick_Handler                          0x000009c1   Thumb Code    74  measurementofdistance.o(i.SysTick_Handler)
-    SysTick_Init                             0x00000a21   Thumb Code    42  measurementofdistance.o(i.SysTick_Init)
-    TExaS_Init                               0x00000a51   Thumb Code   480  texas.o(i.TExaS_Init)
-    Timer4A_Handler                          0x00000ce1   Thumb Code    20  texas.o(i.Timer4A_Handler)
-    Timer5A_Handler                          0x00000d01   Thumb Code  2132  texas.o(i.Timer5A_Handler)
-    UART0_Init                               0x00001581   Thumb Code   160  texas.o(i.UART0_Init)
-    UART_ConvertDistance                     0x00001641   Thumb Code   286  measurementofdistance.o(i.UART_ConvertDistance)
-    checkADCconfiguration                    0x00001765   Thumb Code   150  texas.o(i.checkADCconfiguration)
-    checkDisplayconfiguration                0x0000180d   Thumb Code   636  texas.o(i.checkDisplayconfiguration)
-    checkLinearity                           0x00001ab5   Thumb Code   416  texas.o(i.checkLinearity)
-    main                                     0x00001ca5   Thumb Code   144  measurementofdistance.o(i.main)
-    __aeabi_d2uiz                            0x00001d5d   Thumb Code     0  dfixu.o(x$fpl$dfixu)
-    _dfixu                                   0x00001d5d   Thumb Code    90  dfixu.o(x$fpl$dfixu)
-    __aeabi_ui2d                             0x00001db7   Thumb Code     0  dflt_clz.o(x$fpl$dfltu)
-    _dfltu                                   0x00001db7   Thumb Code    38  dflt_clz.o(x$fpl$dfltu)
-    __aeabi_dmul                             0x00001ddd   Thumb Code     0  dmul.o(x$fpl$dmul)
-    _dmul                                    0x00001ddd   Thumb Code   332  dmul.o(x$fpl$dmul)
-    __fpl_dnaninf                            0x00001f31   Thumb Code   156  dnaninf.o(x$fpl$dnaninf)
-    __fpl_dretinf                            0x00001fcd   Thumb Code    12  dretinf.o(x$fpl$dretinf)
-    __I$use$fp                               0x00001fd8   Number         0  usenofp.o(x$fpl$usenofp)
-    Port                                     0x000021b8   Data          24  texas.o(.constdata)
-    InputPortMsgE2                           0x000021d0   Data          40  texas.o(.constdata)
-    InputPortMsgE3                           0x000021f8   Data          40  texas.o(.constdata)
-    InputPortMsgE5                           0x00002220   Data          40  texas.o(.constdata)
-    OutputPortMsg0                           0x00002248   Data          40  texas.o(.constdata)
-    OutputPortMsg1                           0x00002270   Data          40  texas.o(.constdata)
-    OutputPortMsg2                           0x00002298   Data          40  texas.o(.constdata)
-    OutputPortMsg3                           0x000022c0   Data          40  texas.o(.constdata)
-    BlankMsg                                 0x000022e8   Data          40  texas.o(.constdata)
-    InitializedMsg                           0x00002310   Data          40  texas.o(.constdata)
-    IntroMsg                                 0x00002338   Data          40  texas.o(.constdata)
-    DoneMsg                                  0x00002360   Data          40  texas.o(.constdata)
-    TestMsg                                  0x00002388   Data          40  texas.o(.constdata)
-    LabTest                                  0x000023b0   Data        5428  texas.o(.constdata)
-    BgTest                                   0x000038e4   Data         160  texas.o(.constdata)
-    ADCconfigSuccessMsg                      0x00003984   Data          25  texas.o(.constdata)
-    ADCconfigErrorMsg                        0x0000399d   Data          29  texas.o(.constdata)
-    ADCconfigNotUsingS3Msg                   0x000039ba   Data          34  texas.o(.constdata)
-    ADCconfigBadTriggerMsg                   0x000039dc   Data          35  texas.o(.constdata)
-    ADCconfigBadChannelMsg                   0x000039ff   Data          35  texas.o(.constdata)
-    ADCconfigTemperatureMsg                  0x00003a22   Data          35  texas.o(.constdata)
-    ADCconfigSIENotUsedMsg                   0x00003a45   Data          33  texas.o(.constdata)
-    ADCconfigEndNotUsedMsg                   0x00003a66   Data          33  texas.o(.constdata)
-    ADCconfigDifferentialMsg                 0x00003a87   Data          36  texas.o(.constdata)
-    DisplaySuccessMsg                        0x00003aab   Data          32  texas.o(.constdata)
-    DisplayErrorMsg                          0x00003acb   Data          35  texas.o(.constdata)
-    DisplayClockOffMsg                       0x00003aee   Data          34  texas.o(.constdata)
-    DisplayUART0WrongMsg                     0x00003b10   Data          33  texas.o(.constdata)
-    DisplayPortAWrongMsg                     0x00003b31   Data          33  texas.o(.constdata)
-    DisplaySSI0WrongMsg                      0x00003b52   Data          32  texas.o(.constdata)
-    Linearity90Msg                           0x00003b72   Data          35  texas.o(.constdata)
-    LinearityErrorMsg                        0x00003b95   Data          30  texas.o(.constdata)
-    LinearityOutMsg                          0x00003bb3   Data         330  texas.o(.constdata)
-    Key                                      0x00003cfd   Data           8  texas.o(.constdata)
-    Scramble                                 0x00003d08   Data          32  texas.o(.constdata)
-    DeScramble                               0x00003d28   Data          32  texas.o(.constdata)
-    Region$$Table$$Base                      0x00003d48   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x00003d68   Number         0  anon$$obj.o(Region$$Table)
+    ADC0_Init                                0x000003f1   Thumb Code   184  adc.o(i.ADC0_Init)
+    ADC1_In                                  0x000004cd   Thumb Code     6  texas.o(i.ADC1_In)
+    ADC1_Init                                0x000004d9   Thumb Code   174  texas.o(i.ADC1_Init)
+    Convert                                  0x000005ad   Thumb Code    42  measurementofdistance.o(i.Convert)
+    Delay1ms                                 0x000005dd   Thumb Code    22  measurementofdistance.o(i.Delay1ms)
+    Encrypt                                  0x000005f5   Thumb Code    92  texas.o(i.Encrypt)
+    Nokia5110_Clear                          0x00000661   Thumb Code    32  nokia5110.o(i.Nokia5110_Clear)
+    Nokia5110_Init                           0x00000681   Thumb Code   316  nokia5110.o(i.Nokia5110_Init)
+    Nokia5110_OutChar                        0x000007ed   Thumb Code    52  nokia5110.o(i.Nokia5110_OutChar)
+    Nokia5110_OutString                      0x00000825   Thumb Code    22  nokia5110.o(i.Nokia5110_OutString)
+    Nokia5110_SetCursor                      0x0000083b   Thumb Code    48  nokia5110.o(i.Nokia5110_SetCursor)
+    PLL_Init                                 0x0000086d   Thumb Code   118  texas.o(i.PLL_Init)
+    SetCode                                  0x000008e9   Thumb Code    20  texas.o(i.SetCode)
+    SetCourse                                0x00000901   Thumb Code    20  texas.o(i.SetCourse)
+    SetGrade                                 0x00000919   Thumb Code   196  texas.o(i.SetGrade)
+    SysTick_Handler                          0x000009e5   Thumb Code    74  measurementofdistance.o(i.SysTick_Handler)
+    SysTick_Init                             0x00000a45   Thumb Code    42  measurementofdistance.o(i.SysTick_Init)
+    TExaS_Init                               0x00000a75   Thumb Code   480  texas.o(i.TExaS_Init)
+    Timer4A_Handler                          0x00000d05   Thumb Code    20  texas.o(i.Timer4A_Handler)
+    Timer5A_Handler                          0x00000d25   Thumb Code  2132  texas.o(i.Timer5A_Handler)
+    UART0_Init                               0x000015a5   Thumb Code   160  texas.o(i.UART0_Init)
+    UART_ConvertDistance                     0x00001665   Thumb Code   286  measurementofdistance.o(i.UART_ConvertDistance)
+    checkADCconfiguration                    0x00001789   Thumb Code   150  texas.o(i.checkADCconfiguration)
+    checkDisplayconfiguration                0x00001831   Thumb Code   636  texas.o(i.checkDisplayconfiguration)
+    checkLinearity                           0x00001ad9   Thumb Code   416  texas.o(i.checkLinearity)
+    main                                     0x00001cc9   Thumb Code   150  measurementofdistance.o(i.main)
+    __aeabi_d2uiz                            0x00001d89   Thumb Code     0  dfixu.o(x$fpl$dfixu)
+    _dfixu                                   0x00001d89   Thumb Code    90  dfixu.o(x$fpl$dfixu)
+    __aeabi_ui2d                             0x00001de3   Thumb Code     0  dflt_clz.o(x$fpl$dfltu)
+    _dfltu                                   0x00001de3   Thumb Code    38  dflt_clz.o(x$fpl$dfltu)
+    __aeabi_dmul                             0x00001e09   Thumb Code     0  dmul.o(x$fpl$dmul)
+    _dmul                                    0x00001e09   Thumb Code   332  dmul.o(x$fpl$dmul)
+    __fpl_dnaninf                            0x00001f5d   Thumb Code   156  dnaninf.o(x$fpl$dnaninf)
+    __fpl_dretinf                            0x00001ff9   Thumb Code    12  dretinf.o(x$fpl$dretinf)
+    __I$use$fp                               0x00002004   Number         0  usenofp.o(x$fpl$usenofp)
+    Port                                     0x000021e4   Data          24  texas.o(.constdata)
+    InputPortMsgE2                           0x000021fc   Data          40  texas.o(.constdata)
+    InputPortMsgE3                           0x00002224   Data          40  texas.o(.constdata)
+    InputPortMsgE5                           0x0000224c   Data          40  texas.o(.constdata)
+    OutputPortMsg0                           0x00002274   Data          40  texas.o(.constdata)
+    OutputPortMsg1                           0x0000229c   Data          40  texas.o(.constdata)
+    OutputPortMsg2                           0x000022c4   Data          40  texas.o(.constdata)
+    OutputPortMsg3                           0x000022ec   Data          40  texas.o(.constdata)
+    BlankMsg                                 0x00002314   Data          40  texas.o(.constdata)
+    InitializedMsg                           0x0000233c   Data          40  texas.o(.constdata)
+    IntroMsg                                 0x00002364   Data          40  texas.o(.constdata)
+    DoneMsg                                  0x0000238c   Data          40  texas.o(.constdata)
+    TestMsg                                  0x000023b4   Data          40  texas.o(.constdata)
+    LabTest                                  0x000023dc   Data        5428  texas.o(.constdata)
+    BgTest                                   0x00003910   Data         160  texas.o(.constdata)
+    ADCconfigSuccessMsg                      0x000039b0   Data          25  texas.o(.constdata)
+    ADCconfigErrorMsg                        0x000039c9   Data          29  texas.o(.constdata)
+    ADCconfigNotUsingS3Msg                   0x000039e6   Data          34  texas.o(.constdata)
+    ADCconfigBadTriggerMsg                   0x00003a08   Data          35  texas.o(.constdata)
+    ADCconfigBadChannelMsg                   0x00003a2b   Data          35  texas.o(.constdata)
+    ADCconfigTemperatureMsg                  0x00003a4e   Data          35  texas.o(.constdata)
+    ADCconfigSIENotUsedMsg                   0x00003a71   Data          33  texas.o(.constdata)
+    ADCconfigEndNotUsedMsg                   0x00003a92   Data          33  texas.o(.constdata)
+    ADCconfigDifferentialMsg                 0x00003ab3   Data          36  texas.o(.constdata)
+    DisplaySuccessMsg                        0x00003ad7   Data          32  texas.o(.constdata)
+    DisplayErrorMsg                          0x00003af7   Data          35  texas.o(.constdata)
+    DisplayClockOffMsg                       0x00003b1a   Data          34  texas.o(.constdata)
+    DisplayUART0WrongMsg                     0x00003b3c   Data          33  texas.o(.constdata)
+    DisplayPortAWrongMsg                     0x00003b5d   Data          33  texas.o(.constdata)
+    DisplaySSI0WrongMsg                      0x00003b7e   Data          32  texas.o(.constdata)
+    Linearity90Msg                           0x00003b9e   Data          35  texas.o(.constdata)
+    LinearityErrorMsg                        0x00003bc1   Data          30  texas.o(.constdata)
+    LinearityOutMsg                          0x00003bdf   Data         330  texas.o(.constdata)
+    Key                                      0x00003d29   Data           8  texas.o(.constdata)
+    Scramble                                 0x00003d34   Data          32  texas.o(.constdata)
+    DeScramble                               0x00003d54   Data          32  texas.o(.constdata)
+    Region$$Table$$Base                      0x00003d74   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x00003d94   Number         0  anon$$obj.o(Region$$Table)
     Distance                                 0x20000000   Data           4  measurementofdistance.o(.data)
     ADCdata                                  0x20000004   Data           4  measurementofdistance.o(.data)
     Flag                                     0x20000008   Data           4  measurementofdistance.o(.data)
@@ -712,9 +714,9 @@ Memory Map of the image
 
   Image Entry point : 0x0000026d
 
-  Load Region LR_1 (Base: 0x00000000, Size: 0x00003de4, Max: 0xffffffff, ABSOLUTE)
+  Load Region LR_1 (Base: 0x00000000, Size: 0x00003e10, Max: 0xffffffff, ABSOLUTE)
 
-    Execution Region ER_RO (Base: 0x00000000, Size: 0x00003d68, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RO (Base: 0x00000000, Size: 0x00003d94, Max: 0xffffffff, ABSOLUTE)
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -774,43 +776,44 @@ Memory Map of the image
     0x000003c2   0x00000000   Code   RO          423    .text               c_w.l(indicate_semi.o)
     0x000003c2   0x00000002   PAD
     0x000003c4   0x0000002c   Code   RO          121    i.ADC0_In           adc.o
-    0x000003f0   0x000000d8   Code   RO          122    i.ADC0_Init         adc.o
-    0x000004c8   0x0000000c   Code   RO          139    i.ADC1_In           texas.o
-    0x000004d4   0x000000d4   Code   RO          140    i.ADC1_Init         texas.o
-    0x000005a8   0x00000030   Code   RO           12    i.Convert           measurementofdistance.o
-    0x000005d8   0x00000016   Code   RO           13    i.Delay1ms          measurementofdistance.o
-    0x000005ee   0x00000002   PAD
-    0x000005f0   0x0000006c   Code   RO          142    i.Encrypt           texas.o
-    0x0000065c   0x0000016c   Code   RO           68    i.Nokia5110_Init    nokia5110.o
-    0x000007c8   0x00000038   Code   RO           69    i.Nokia5110_OutChar  nokia5110.o
-    0x00000800   0x00000016   Code   RO           70    i.Nokia5110_OutString  nokia5110.o
-    0x00000816   0x00000030   Code   RO           72    i.Nokia5110_SetCursor  nokia5110.o
-    0x00000846   0x00000002   PAD
-    0x00000848   0x0000007c   Code   RO          143    i.PLL_Init          texas.o
-    0x000008c4   0x00000018   Code   RO          145    i.SetCode           texas.o
-    0x000008dc   0x00000018   Code   RO          146    i.SetCourse         texas.o
-    0x000008f4   0x000000cc   Code   RO          147    i.SetGrade          texas.o
-    0x000009c0   0x00000060   Code   RO           14    i.SysTick_Handler   measurementofdistance.o
-    0x00000a20   0x00000030   Code   RO           15    i.SysTick_Init      measurementofdistance.o
-    0x00000a50   0x00000290   Code   RO          151    i.TExaS_Init        texas.o
-    0x00000ce0   0x00000020   Code   RO          153    i.Timer4A_Handler   texas.o
-    0x00000d00   0x00000880   Code   RO          154    i.Timer5A_Handler   texas.o
-    0x00001580   0x000000c0   Code   RO          157    i.UART0_Init        texas.o
-    0x00001640   0x00000124   Code   RO           16    i.UART_ConvertDistance  measurementofdistance.o
-    0x00001764   0x000000a8   Code   RO          160    i.checkADCconfiguration  texas.o
-    0x0000180c   0x000002a8   Code   RO          161    i.checkDisplayconfiguration  texas.o
-    0x00001ab4   0x000001a4   Code   RO          162    i.checkLinearity    texas.o
-    0x00001c58   0x0000004c   Code   RO           73    i.lcdwrite          nokia5110.o
-    0x00001ca4   0x000000b8   Code   RO           17    i.main              measurementofdistance.o
-    0x00001d5c   0x0000005a   Code   RO          308    x$fpl$dfixu         fz_ws.l(dfixu.o)
-    0x00001db6   0x00000026   Code   RO          312    x$fpl$dfltu         fz_ws.l(dflt_clz.o)
-    0x00001ddc   0x00000154   Code   RO          318    x$fpl$dmul          fz_ws.l(dmul.o)
-    0x00001f30   0x0000009c   Code   RO          321    x$fpl$dnaninf       fz_ws.l(dnaninf.o)
-    0x00001fcc   0x0000000c   Code   RO          323    x$fpl$dretinf       fz_ws.l(dretinf.o)
-    0x00001fd8   0x00000000   Code   RO          325    x$fpl$usenofp       fz_ws.l(usenofp.o)
-    0x00001fd8   0x000001e0   Data   RO           74    .constdata          nokia5110.o
-    0x000021b8   0x00001b90   Data   RO          165    .constdata          texas.o
-    0x00003d48   0x00000020   Data   RO          475    Region$$Table       anon$$obj.o
+    0x000003f0   0x000000dc   Code   RO          122    i.ADC0_Init         adc.o
+    0x000004cc   0x0000000c   Code   RO          139    i.ADC1_In           texas.o
+    0x000004d8   0x000000d4   Code   RO          140    i.ADC1_Init         texas.o
+    0x000005ac   0x00000030   Code   RO           12    i.Convert           measurementofdistance.o
+    0x000005dc   0x00000016   Code   RO           13    i.Delay1ms          measurementofdistance.o
+    0x000005f2   0x00000002   PAD
+    0x000005f4   0x0000006c   Code   RO          142    i.Encrypt           texas.o
+    0x00000660   0x00000020   Code   RO           66    i.Nokia5110_Clear   nokia5110.o
+    0x00000680   0x0000016c   Code   RO           68    i.Nokia5110_Init    nokia5110.o
+    0x000007ec   0x00000038   Code   RO           69    i.Nokia5110_OutChar  nokia5110.o
+    0x00000824   0x00000016   Code   RO           70    i.Nokia5110_OutString  nokia5110.o
+    0x0000083a   0x00000030   Code   RO           72    i.Nokia5110_SetCursor  nokia5110.o
+    0x0000086a   0x00000002   PAD
+    0x0000086c   0x0000007c   Code   RO          143    i.PLL_Init          texas.o
+    0x000008e8   0x00000018   Code   RO          145    i.SetCode           texas.o
+    0x00000900   0x00000018   Code   RO          146    i.SetCourse         texas.o
+    0x00000918   0x000000cc   Code   RO          147    i.SetGrade          texas.o
+    0x000009e4   0x00000060   Code   RO           14    i.SysTick_Handler   measurementofdistance.o
+    0x00000a44   0x00000030   Code   RO           15    i.SysTick_Init      measurementofdistance.o
+    0x00000a74   0x00000290   Code   RO          151    i.TExaS_Init        texas.o
+    0x00000d04   0x00000020   Code   RO          153    i.Timer4A_Handler   texas.o
+    0x00000d24   0x00000880   Code   RO          154    i.Timer5A_Handler   texas.o
+    0x000015a4   0x000000c0   Code   RO          157    i.UART0_Init        texas.o
+    0x00001664   0x00000124   Code   RO           16    i.UART_ConvertDistance  measurementofdistance.o
+    0x00001788   0x000000a8   Code   RO          160    i.checkADCconfiguration  texas.o
+    0x00001830   0x000002a8   Code   RO          161    i.checkDisplayconfiguration  texas.o
+    0x00001ad8   0x000001a4   Code   RO          162    i.checkLinearity    texas.o
+    0x00001c7c   0x0000004c   Code   RO           73    i.lcdwrite          nokia5110.o
+    0x00001cc8   0x000000c0   Code   RO           17    i.main              measurementofdistance.o
+    0x00001d88   0x0000005a   Code   RO          308    x$fpl$dfixu         fz_ws.l(dfixu.o)
+    0x00001de2   0x00000026   Code   RO          312    x$fpl$dfltu         fz_ws.l(dflt_clz.o)
+    0x00001e08   0x00000154   Code   RO          318    x$fpl$dmul          fz_ws.l(dmul.o)
+    0x00001f5c   0x0000009c   Code   RO          321    x$fpl$dnaninf       fz_ws.l(dnaninf.o)
+    0x00001ff8   0x0000000c   Code   RO          323    x$fpl$dretinf       fz_ws.l(dretinf.o)
+    0x00002004   0x00000000   Code   RO          325    x$fpl$usenofp       fz_ws.l(usenofp.o)
+    0x00002004   0x000001e0   Data   RO           74    .constdata          nokia5110.o
+    0x000021e4   0x00001b90   Data   RO          165    .constdata          texas.o
+    0x00003d74   0x00000020   Data   RO          475    Region$$Table       anon$$obj.o
 
 
     Execution Region ER_RW (Base: 0x20000000, Size: 0x0000007c, Max: 0xffffffff, ABSOLUTE)
@@ -841,14 +844,14 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       260         44          0          0          0        838   adc.o
-       690         84          0         12         10       4899   measurementofdistance.o
-       566         62        480          0          0       4217   nokia5110.o
+       264         44          0          0          0        838   adc.o
+       698         82          0         12         10       4903   measurementofdistance.o
+       598         62        480          0          0       4631   nokia5110.o
        692        632          0          0       1024        884   startup.o
       5032        592       7056        112        628      28357   texas.o
 
     ----------------------------------------------------------------------
-      7244       1414       7568        124       1664      39195   Object Totals
+      7288       1412       7568        124       1664      39613   Object Totals
          0          0         32          0          0          0   (incl. Generated)
          4          0          0          0          2          0   (incl. Padding)
 
@@ -904,15 +907,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      8152       1450       7568        124       1764      38427   Grand Totals
-      8152       1450       7568        124       1764      38427   ELF Image Totals
-      8152       1450       7568        124          0          0   ROM Totals
+      8196       1448       7568        124       1764      38793   Grand Totals
+      8196       1448       7568        124       1764      38793   ELF Image Totals
+      8196       1448       7568        124          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                15720 (  15.35kB)
+    Total RO  Size (Code + RO Data)                15764 (  15.39kB)
     Total RW  Size (RW Data + ZI Data)              1888 (   1.84kB)
-    Total ROM Size (Code + RO Data + RW Data)      15844 (  15.47kB)
+    Total ROM Size (Code + RO Data + RW Data)      15888 (  15.52kB)
 
 ==============================================================================
 
