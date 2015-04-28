@@ -84,14 +84,12 @@ void SysTick_Init(void);
 void Timer2_Init(unsigned long period);
 void Delay100ms(unsigned long count); // time delay in 0.1 seconds
 void Delayms(unsigned long ms);
-volatile unsigned long Normal_Fire;
-volatile unsigned long Special_Fire;
+volatile unsigned long Fire;
 unsigned long TimerCount;
 unsigned long Semaphore;
-unsigned char flag_sound;
+unsigned char flag_sound;							// a flag to indicate firing
 unsigned int Index_N = 0;							// index variable for normal firing 
 unsigned int Index_S = 0;							// index variable for special firing
-
 
 // *************************** Images ***************************
 // enemy fly that starts at the top of the screen (with wings)
@@ -162,9 +160,6 @@ const unsigned char heart[] ={
  0x09, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x99, 0x99, 0x90, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x09, 0x99,
  0x99, 0x99, 0x99, 0x90, 0x00, 0x00, 0x09, 0x99, 0x90, 0x09, 0x99, 0x90, 0x00, 0x00, 0x00, 0x99, 0x00, 0x00, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF
 };
-
-
-
 
 // small shield floating in space to cover the player's ship from enemy fire (undamaged)
 // width=18 x height=5
@@ -326,7 +321,7 @@ int main (void){
 	SysTick_Init();
 	DAC_Init();
 	Nokia5110_Init();
-	Timer2_Init(7256);							// initiate Timer 2 at 11kHz
+	Timer2_Init(7111);							// initiate Timer 2 at 11.25kHz
 	EnableInterrupts();
 	/*	Random_Init(1);
 	Nokia5110_Init();
@@ -339,12 +334,12 @@ int main (void){
 	Nokia5110_PrintBMP(20, 38, heart, 0);
 	Nokia5110_DisplayBuffer();     // draw buffer */
 	while(1){		
-	/*	Delay100ms(5);              // delay 0.5 sec at 5 MHz
+	/*	Delay100ms(5);             // delay 0.5 sec at 5 MHz
 		for (i=0;i<40;i=i+5){
 			Nokia5110_ClearBuffer();
 			Nokia5110_PrintBMP(0+i, ENEMY10H - 1, SmallEnemyNew1, 0);
 			Nokia5110_PrintBMP(20+i, 38, heart, 0);
-			Nokia5110_DisplayBuffer();  // draw buffer
+			Nokia5110_DisplayBuffer(); // draw buffer
 			Delay100ms(1);					
 		}*/
 	}
@@ -400,56 +395,57 @@ void DAC_Init(void){
 // Input: 4-bit data, 0 to 15 
 // Output: none
 void DAC_Out(unsigned long data){
-	GPIO_PORTB_DATA_R = data;						// output data to DAC
+	GPIO_PORTB_DATA_R = data;							// output data to DAC
 }
 
 // **************SysTick_Init*********************
-// Timer initialization for buttons and slider pot with priority of 1
+// System clock initialization to run at 30 Hz 
+// Input: None
+// Output: None
+// Note: clock initialization with priority of 0
+//				for buttons, LEDs, and slider pot
+void SysTick_Init(void){ 
+	// pins configuration
+  PORTS_Init();												// initialize switched and LEDs ports
+	
+	// SysTick interrupt configuration
+	NVIC_ST_CTRL_R = 0; 								// disable SysTick during initialization
+	NVIC_ST_RELOAD_R = 2666665; 				// reload value for 30 Hz (1/60 interrupt)
+	NVIC_ST_CURRENT_R = 0; 							// write to current to clear it
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R& 0x00FFFFFF);//|0x20000000;	// set priority 1
+	NVIC_ST_CTRL_R = 0x00000007;				// enable clock and interrupt 
+}
+
+// *******************SysTick_Handler***********************
+// Timer handler to check for switch pressing, flashing LED,
+// and detecting pot movement
 // Input: None
 // Output: None
 // Note: if player is shooting the normal missle (PE0), normal LED (PB4) toggle
 // 			 if player is shooting the special missle (PE1), special LED (PB5)toggle
 //		   Slide pot pin 1 connected to ground,Slide pot pin 2 connected to PE2/AIN1 and
 // 			 Slide pot pin 3 connected to +3.3V 
-void SysTick_Init(void){ 
-	// pins configuration
-  PORTS_Init();					// initialize switched and LEDs ports
-	
-	// SysTick interrupt configuration
-	NVIC_ST_CTRL_R = 0; 								// disable SysTick during initialization
-	NVIC_ST_RELOAD_R = 2666665; 				// reload value for 30 Hz (1/60 interrupt)
-	NVIC_ST_CURRENT_R = 0; 							// write to current to clear it
-	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R& 0x00FFFFFF)|0x01000000;	// set priority 1
-	NVIC_ST_CTRL_R = 0x00000007;				// enable clock and interrupt 
-}
-
-// called at 30 Hz
 void SysTick_Handler(void){
 	Nokia5110_ClearBuffer();
-	Normal_Fire = GPIO_PORTE_DATA_R & 0x03;
-	Delayms(10);	// delay of 12ms
-	if (Normal_Fire == 0x01) {	// if switch (PE0) is pressed
-		GPIO_PORTB_DATA_R ^= 0x10;	// toggle PB4
-	//flag_sound = 1;
-	//	Nokia5110_PrintBMP(10, 10, Missile0, 1);
+	if (Fire == 0x01){
+		GPIO_PORTB_DATA_R ^= 0x10;				// toggle PB4
+		flag_sound = 1;										// set flag to 1 to indicate normal firing
 	}
-	else if(Normal_Fire == 0x02){	// if switch(PE1) is pressed
-		GPIO_PORTB_DATA_R ^= 0x20;	// toggle PB5
-		//flag_sound = 2;
-		//Nokia5110_PrintBMP(10, 10, Laser0, 1);
+	else if (Fire == 0x02){
+		GPIO_PORTB_DATA_R ^= 0x20;				// toggle PB5
+		flag_sound = 2;										// set flag to 2 to indicate special firing
 	}
 	else{
-		GPIO_PORTB_DATA_R = 0x00;
+		GPIO_PORTB_DATA_R = 0x00;				// turn off both LEDs
+		flag_sound = 0;									// reset flag 
 	}
-	Nokia5110_DisplayBuffer();     // draw buffer	
 }
-
 
 // **************Timer2_Init*********************
 // Timer to play sounds
 // Input: period (the divider for the frequency)
 // Output: None
-// Note: this timer has the highest priority and runs at 11kHz 
+// Note: this timer has priority of 0 and runs at 11kHz 
 void Timer2_Init(unsigned long period){ 
   unsigned long volatile delay;
   SYSCTL_RCGCTIMER_R |= 0x04;   // 0) activate timer2
@@ -463,7 +459,7 @@ void Timer2_Init(unsigned long period){
   TIMER2_TAPR_R = 0;            // 5) bus clock resolution
   TIMER2_ICR_R = 0x00000001;    // 6) clear timer2A timeout flag
   TIMER2_IMR_R = 0x00000001;    // 7) arm timeout interrupt
-  NVIC_PRI5_R = NVIC_PRI5_R&0x00FFFFFF; // 8) priority 0
+  NVIC_PRI5_R = (NVIC_PRI5_R&0x00FFFFFF); // 8) priority 0
 // interrupts enabled in the main program after all devices initialized
 // vector number 39, interrupt number 23
   NVIC_EN0_R = 1<<23;           // 9) enable IRQ 23 in NVIC
@@ -471,27 +467,32 @@ void Timer2_Init(unsigned long period){
 }
 
 // **************Timer2_Handler*********************
-// Handler to handle timer events
+// Handler to handle timer events 
 // Input: None
 // Output: None
-// Note: 
+// Note: This timre reads a flag set by SysTick and 
+// 				sound the sound for firing accordingly 
 void Timer2A_Handler(void){
-  TIMER2_ICR_R = 0x00000001;   	// acknowledge timer2A timeout
+  TIMER2_ICR_R = 0x00000001;   				// acknowledge timer2A timeout
   TimerCount++;
-  Semaphore = 1; 														// trigger
-	Normal_Fire = GPIO_PORTE_DATA_R & 0x03;		// reading the switches
-	if (Normal_Fire == 0x01) {								// if switch (PE0) is pressed
-		Index_N = (Index_N+1)&0x7FF;						// index to cycle over sin wave (0x7FF would cycle over the 1802 table)
-		DAC_Out(shoot[Index_N]);						// output the sine wave value to DAC
+  Semaphore = 1; 											// trigger
+	Fire = GPIO_PORTE_DATA_R & 0x03;		// reading the switches
+	if (flag_sound == 1){								// if switch (PE0) is pressed
+		if (Index_N<1802){								// 1802 is the size of the highpitch array
+			Index_N = (Index_N+1)&0x7FF;		// index to cycle over sin wave (0x7FF would cycle over the 1802 table)
+			DAC_Out(highpitch[Index_N]);		// output the sine wave value to DAC
+		}
 	}
-	else if (Normal_Fire == 0x02){
-		Index_S = (Index_S+1)&0xFFF;						// index to cycle over sin wave (0xFFF would cycle over the 4080 table)
-		DAC_Out(highpitch[Index_S]);								// output the sine wave value to DAC
+	else if (flag_sound == 2){
+		if (Index_S < 4080){							// 4080 is the size of the shoot array
+			Index_S = (Index_S+1)&0xFFF;		// index to cycle over sin wave (0xFFF would cycle over the 4080 table)
+			DAC_Out(shoot[Index_S]);				// output the sine wave value to DAC
+		}
 	}
 	else{
-		GPIO_PORTB_DATA_R = 0x00;
+		GPIO_PORTB_DATA_R = 0x00;		
+		Index_N = Index_S = 0;						// reset indeces
 	}
-	flag_sound = 0;
 }
 void Delay100ms(unsigned long count){unsigned long volatile time;
   while(count>0){
@@ -503,7 +504,7 @@ void Delay100ms(unsigned long count){unsigned long volatile time;
   }
 }
 
-
+// **************Delayms*********************
 // Subroutine to add a delay
 // Inputs: number of 1ms delays
 // Output: None
