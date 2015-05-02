@@ -4,3 +4,4 @@
 .\spaceinvaders.o: Random.h
 .\spaceinvaders.o: TExaS.h
 .\spaceinvaders.o: C:\Keil\ARM\ARMCC\bin\..\include\stdlib.h
+.\spaceinvaders.o: C:\Keil\ARM\ARMCC\bin\..\include\stdbool.h
