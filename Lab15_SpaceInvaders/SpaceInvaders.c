@@ -79,6 +79,7 @@
 // FUNCTION PROTOTYPES: Each subroutine defined
 void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
+void display(unsigned int);
 void PORTS_Init(void);
 void DAC_Init(void);
 void ADC0_Init(void);
@@ -87,10 +88,11 @@ unsigned char Player_Move(void);
 void SysTick_Init(void);
 void Timer2_Init(unsigned long period);
 void Delayms(unsigned long ms);
-unsigned char Rand(unsigned char high, unsigned char low);
+unsigned char Rand(unsigned char low,unsigned char high);
+
+// GLOBAL VARIABLES DECLERATION
 volatile unsigned long Fire;
 volatile unsigned long Previous_Fire = 0;
-unsigned long TimerCount;
 unsigned char flag_sound;							// a flag to indicate firing
 unsigned int Index_N = 0;							// index variable for normal firing 
 unsigned int Index_S = 0;							// index variable for special firing
@@ -99,7 +101,10 @@ unsigned char R_number;								// random number varable
 unsigned char Enemy_Rand;
 unsigned long Previous_ADC;
 unsigned long Player_Loc;
+unsigned char missile_loc;
+char missile_life;
 unsigned enemy_hit_flag = 0;	
+const unsigned char *missile_image;
 // *************************** Images ***************************
 // enemy fly that starts at the top of the screen (with wings)
 // width=16 x height=10
@@ -249,16 +254,6 @@ const unsigned char Missile0[] = {
  0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0xF0, 0x00,
  0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
 
-// a missile in flight
-// includes one blacked out row on the top, bottom, and left of the image to prevent smearing when moved 1 pixel down, up, or right
-// width=4 x height=9
-const unsigned char Missile1[] = {
- 0x42, 0x4D, 0x9A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x76, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
- 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80,
- 0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x80, 0x00, 0x00, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x80, 0x00, 0x00, 0x80, 0x80, 0x80, 0x00, 0xC0, 0xC0, 0xC0, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF,
- 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x0F,
- 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
-
 // blank space to cover a missile after it hits something
 // width=4 x height=9
 const unsigned char Missile2[] = {
@@ -323,12 +318,10 @@ int main (void){
 	unsigned char level = 0;
 //	unsigned char Enemy_position;
 	unsigned int i; 
-	unsigned char missile_loc;
-	const unsigned char *missile_image;
 	bool missile_flag = false;
 	bool explosion_flag = false;
-	char missile_life;
-	
+	unsigned char enemy_move_flag;
+
 	TExaS_Init(SSI0_Real_Nokia5110_Scope);  // set system clock to 80 MHz
 	ADC0_Init();
 	DAC_Init();
@@ -337,16 +330,15 @@ int main (void){
 	SysTick_Init();
 
 	EnableInterrupts();
-	
   Nokia5110_Clear();
   Nokia5110_SetCursor(1, 1);
   Nokia5110_OutString("Welcome To");
-  Nokia5110_SetCursor(2, 2);
+  Nokia5110_SetCursor(3, 3);
   Nokia5110_OutString("ANIMAL");
-  Nokia5110_SetCursor(0, 3);
+  Nokia5110_SetCursor(0, 4);
   Nokia5110_OutString("* INVADERS *");
-	Delayms(10);								//!!! for board: 1000
-	//while(Fire == 0){};
+	while ((GPIO_PORTE_DATA_R & 0x03) == 0x00);
+	srand(NVIC_ST_CURRENT_R);
 	for (i=0;i<5;i++){
 		//Enemy_position = Rand(80,5);
 		//Enemy[i].x = Enemy_position;
@@ -367,33 +359,22 @@ int main (void){
 	Enemy[2].x = 32;
 	Enemy[3].x = 48;
 	Enemy[4].x = 64;
-	
+
 	while(1){	
 		Nokia5110_ClearBuffer();		
-		if (level == 0){
-			Enemy_Rand = Rand(0,80)%4+1;
+		if (level == 0){				// display enemy and player
+			Enemy_Rand = Rand(0,4);//Rand(0,80)%4+1;
+			Player_Loc = Rand(0,64);
+			missile_life = 1;
 			level = 1;
+			display(35);
+			continue;							// skip to the next iteration
 		}
+		missile_life = 0;
 		Player_Loc = Player_Move();
+	
 		///// block to handles when the player fires a missile
 		if (enemy_hit_flag ==1){	// when a missile is firing
-			///// block to handles moving missiles
-		  if (i> 35){							// if the missile reached the top
-				i = 13;
-				enemy_hit_flag = 1;
-				missile_flag = false;
-				missile_image = missile_image = Missile2;
-			}
-			else {									// if the missile is on its way
-				i += 5;
-			}
-			///// block to handles type of missile selected by witches 
-			if (Fire ==1){						
-				missile_image = Missile0;
-			}
-			else if (Fire == 2){
-				missile_image = Laser0;
-			}
 			///// block to handles first time a missile is fired
 			if (missile_flag == false){
 				missile_loc = Player_Loc+7;
@@ -403,9 +384,10 @@ int main (void){
 			if (explosion_flag == true){		// after enemy exploded
 				Enemy[Enemy_Rand].image = SmallExplosion1;		// show nothing at the enemny's position
 				missile_image = Missile2;
+				enemy_hit_flag = 0;
 				explosion_flag = false;
 			}
-			else{														// when the enemy is hit
+			else{										// when the enemy is hit
 				if ((Enemy[Enemy_Rand].life == 0) &&(missile_loc >= Enemy[Enemy_Rand].x)&&(missile_loc <= Enemy[Enemy_Rand].x+15) && ((48-i) <= Enemy[Enemy_Rand].y+1)){
 					Enemy[Enemy_Rand].image = SmallExplosion0;
 					missile_image = Missile2;
@@ -413,19 +395,44 @@ int main (void){
 					enemy_hit_flag = 2;
 				}
 			}
+			///// block to handles moving missiles
+		  if (i> 35){							// if the missile reached the top
+				i = 13;
+				enemy_hit_flag = 0;
+				missile_flag = false;
+				missile_image = missile_image = Missile2;
+			}
+			else {									// if the missile is on its way
+				i += 5;
+			}
 		}
 		else if(enemy_hit_flag == 2){			//!!!!!!! make it back to 0 in the next level
 			Enemy[Enemy_Rand].image = SmallExplosion1;		// show nothing at the enemny's position
 			Enemy[Enemy_Rand].life = 1;
 		}
-		Nokia5110_PrintBMP(Player_Loc, 47, PlayerSheildCatNew, 0);
-		Nokia5110_PrintBMP(missile_loc, 48-i, missile_image, 0);
-		Nokia5110_PrintBMP(60, 45, heart, 1);
-		if (Enemy[Enemy_Rand].life == 0){
-			Nokia5110_PrintBMP(Enemy[Enemy_Rand].x, Enemy[Enemy_Rand].y, Enemy[Enemy_Rand].image,Enemy[Enemy_Rand].life);
+		///// block to handles enemy movements
+		else{ 					// move enemy if a missile is not fired
+			enemy_move_flag = Rand(0,100);
+			if ((enemy_move_flag % 5)==0){	
+				if (Enemy[Enemy_Rand].x == 0){
+					Enemy[Enemy_Rand].x += 16;
+				}	
+				else if (Enemy[Enemy_Rand].x == 64){
+					Enemy[Enemy_Rand].x -= 16;
+				}
+				else {
+					enemy_move_flag = Rand(0,1);
+					if (enemy_move_flag){
+						Enemy[Enemy_Rand].x -= 16;
+					}
+					else{
+						Enemy[Enemy_Rand].x += 16;
+					}
+				}
+			}
 		}
-		Nokia5110_DisplayBuffer(); // draw buffer
-		Delayms(10);  					//!!!! for board: 200           
+		display(i);
+		Delayms(200);  					//!!!! for board: 200           
 	/*	for (i=0;i<40;i=i+5){
 			Nokia5110_ClearBuffer();
 			Nokia5110_PrintBMP(0+i, ENEMY10H - 1, SmallEnemyNew1, 0);
@@ -436,6 +443,17 @@ int main (void){
 	}
 }
 
+void display(unsigned int i){
+		Nokia5110_PrintBMP(Player_Loc, 47, PlayerSheildCatNew, 0);
+		if (missile_life == 0){
+			Nokia5110_PrintBMP(missile_loc, 48-i, missile_image, 0);
+		}
+		Nokia5110_PrintBMP(60, 45, heart, 1);
+		if (Enemy[Enemy_Rand].life == 0){
+			Nokia5110_PrintBMP(Enemy[Enemy_Rand].x, Enemy[Enemy_Rand].y, Enemy[Enemy_Rand].image,Enemy[Enemy_Rand].life);
+		}
+		Nokia5110_DisplayBuffer(); // draw buffer
+}
 // **************ADC0_Init*********************
 // ADC initialization for the slider pot
 // Input: none
@@ -491,51 +509,23 @@ unsigned long ADC0_In(void){
 // Note: ...
 unsigned char Player_Move(void){ 
 	unsigned char distance;
-	unsigned long adc;
+	unsigned long adc = 0;
 	int i;
-	do{													// do while to ignore small differences. This gives clear movements
-		Previous_ADC = ADCdata;
-	}	while((unsigned)(ADCdata - Previous_ADC) > 50);
-	/*
-	if (ADCdata < 30){
-		distance = 0;
-	}
-	else if((ADCdata >=30)&&(ADCdata < 50)){
-		distance = 8;
-	}
-	else if((ADCdata >=50)&&(ADCdata < 100)){
-		distance = 16;
-	}
-	else if((ADCdata >=100)&&(ADCdata < 140)){
-		distance = 24;
-	}
-	else if((ADCdata >=140)&&(ADCdata < 172)){
-		distance = 32;
-	}
-	else if((ADCdata >=172)&&(ADCdata < 220)){
-		distance = 48;
-	}
-	else if((ADCdata >=220)&&(ADCdata < 511)){
-		distance = 56;
-	}
-	else{
-		distance = 66;
-	}
-	*/
+
   for (i=0;i<5;i++){					// average 5 ADC readings
 		adc += ADCdata;
 	}
 	adc /= 5;
-	if (adc < 50){
+	if (adc < 80){
 		distance = 0;
 	}
-	else if((adc >=50)&&(adc < 100)){
+	else if((adc >=80)&&(adc < 130)){
 		distance = 16;
 	}
-	else if((adc >=100)&&(adc < 172)){
+	else if((adc >=130)&&(adc < 160)){
 		distance = 32;
 	}
-	else if((adc >=172)&&(adc < 511)){
+	else if((adc >=160)&&(adc < 270)){
 		distance = 48;
 	}
 	else{
@@ -572,7 +562,8 @@ void SysTick_Init(void){
 // 			 Slide pot pin 3 connected to +3.3V 
 void SysTick_Handler(void){
 	ADCdata = ADC0_In();
-	if (Fire == 0x01){
+	if (Fire == 0x01){				
+		missile_image = Missile0;
 		if ((Previous_Fire == 0)|| (Previous_Fire == 2)){
 			enemy_hit_flag = 1;
 			R_number = Rand(80,5);
@@ -582,6 +573,7 @@ void SysTick_Handler(void){
 		GPIO_PORTB_DATA_R ^= 0x10;				// toggle PB4
 	}
 	else if (Fire == 0x02){
+		missile_image = Laser0;
 		if ((Previous_Fire == 0) || (Previous_Fire == 1)){
 			enemy_hit_flag = 1;
 			srand(NVIC_ST_CURRENT_R);
@@ -721,11 +713,10 @@ void Delayms(unsigned long ms){
 // Inputs: high: maximum number
 //					low: minimum number
 // Output: unisgned char that is the generated random number
-// Notes: numbers generated between 14-70
-unsigned char Rand(unsigned char high, unsigned char low){
+// Notes: ...
+unsigned char Rand(unsigned char low, unsigned char high){
 	unsigned char number;
-	srand(NVIC_ST_CURRENT_R);
-	number = ((Random()&0xFF)%high)+1;			// random number between 0-70
+	number = ((rand()>>24)%high)+1;			// random number between low-hight 
 	if (number <= low){
 		number = low;
 	}
