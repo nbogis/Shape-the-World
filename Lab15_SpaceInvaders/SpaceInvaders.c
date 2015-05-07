@@ -100,16 +100,13 @@ unsigned int Index_S = 0;							// index variable for special firing
 unsigned int Index_Ex = 0;						// index variable for explosion
 unsigned long ADCdata;   						  // 12-bit 0 to 4095 sample
 unsigned char R_number;								// random number varable
-unsigned char Enemy_Rand;
-unsigned long Previous_ADC;
-unsigned long Player_Loc;
-unsigned char missile_loc;
-bool missile_flag = false;
-bool explosion_flag = false;
-unsigned char enemy_hit_flag = 0;	
-unsigned char enemy_attack_flag;
+unsigned char Enemy_Rand,missile_loc,heart_loc;
+unsigned long Previous_ADC,Player_Loc;
+bool missile_flag = false,heart_flag = false,explode_flag = false;
+unsigned char enemy_hit_flag = 0,enemy_attack_flag;
 const unsigned char *missile_image;
-// *************************** Images ***************************
+
+// ****  Images ****//
 // enemy fly that starts at the top of the screen (with wings)
 // width=16 x height=10
 const unsigned char SmallEnemyNew1[] ={
@@ -143,7 +140,6 @@ const unsigned char SmallEnemyNew3[] ={
  0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0xF0, 0xFF, 0xFF, 0x0F, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0xF0, 0x00, 0xF0, 0xF0, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x0F, 0x00,
  0x0F, 0x00, 0x00, 0xF0, 0x00, 0xF0, 0xFF};
 
-
 // enemy ship that starts in the middle of the screen (one big eye with arms and legs)
 // width=16 x height=10
 const unsigned char SmallEnemynew[] ={
@@ -165,7 +161,6 @@ const unsigned char heart[] ={
  0x09, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x99, 0x99, 0x90, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x09, 0x99,
  0x99, 0x99, 0x99, 0x90, 0x00, 0x00, 0x09, 0x99, 0x90, 0x09, 0x99, 0x90, 0x00, 0x00, 0x00, 0x99, 0x00, 0x00, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF
 };
-
 
 // player's animal with ring sheild (health level = 3 - complete)
 // width=16 x height=12
@@ -201,8 +196,6 @@ const unsigned char PlayerCatNew[] ={
  0x0B, 0x00, 0x00, 0xB0, 0x00, 0x00, 0x00, 0x00, 0xB0, 0x0B, 0xB0, 0x0B, 0x00, 0x00, 0x00, 0xBB, 0x00, 0x00, 0x00, 0x00, 0xB0, 0x00, 0x00, 0xB0, 0x0B, 0x00, 0x00, 0xB0, 0x0B, 0x00, 0x00, 0xB0,
  0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x0B, 0x0B, 0xBB, 0xBB, 0xB0, 0xB0, 0x00, 0x00, 0xB0, 0xB0, 0x00, 0x00, 0x0B, 0x0B, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x00, 0xB0, 0x00, 0x00, 0x00,
  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
-
-
  
 // large explosion that can be used upon the demise of the player's ship (first frame)
 // width=18 x height=8
@@ -266,23 +259,9 @@ struct State {
 typedef struct State STyp;
 STyp Enemy[5];
 	
-// ************** Capture image dimensions out of BMP**********
-#define BUNKERW     ((unsigned char)Bunker0[18])
-#define BUNKERH     ((unsigned char)Bunker0[22])
-#define ENEMY30W    ((unsigned char)SmallEnemyNew3[18])
-#define ENEMY30H    ((unsigned char)SmallEnemyNew3[22])
-#define ENEMY20W    ((unsigned char)SmallEnemyNew2[18])
-#define ENEMY20H    ((unsigned char)SmallEnemyNew2[22])
-#define ENEMY10W    ((unsigned char)SmallEnemyNew1[18])
+// **** Capture image dimensions out of BMP ****//
 #define ENEMY10H    ((unsigned char)SmallEnemyNew1[22])
-#define ENEMYBONUSW ((unsigned char)SmallEnemyBonus0[18])
-#define ENEMYBONUSH ((unsigned char)SmallEnemyBonus0[22])
-#define LASERW      ((unsigned char)Laser0[18])
-#define LASERH      ((unsigned char)Laser0[22])
-#define MISSILEW    ((unsigned char)Missile0[18])
-#define MISSILEH    ((unsigned char)Missile0[22])
-#define PLAYERW     ((unsigned char)PlayerShip0[18])
-#define PLAYERH     ((unsigned char)PlayerShip0[22])
+
 	 
 int main (void){
 	unsigned char level = 1;
@@ -290,10 +269,7 @@ int main (void){
   unsigned char shuffle[]= {0,1,2,3,4};				// array to shuffle between enemies
 	//	unsigned char Enemy_position;
 	unsigned int i,n = ENEMY10H - 1;
-	unsigned char t,tmp;				
-	unsigned char explosion_flag = 6;					// unrecognized value
-	unsigned char enemy_move_flag;
-	unsigned char all_dead_flag;
+	unsigned char t,tmp,heart_Rand,enemy_move_flag, all_dead_flag,explosion_flag = 6;					// unrecognized value
 	bool attack_flag = false;
 	unsigned char Player_life = 3;
 	const unsigned char* Player_image = PlayerSheildCatNew;
@@ -323,14 +299,14 @@ int main (void){
 		Nokia5110_ClearBuffer();
 		if (Player_life == 0){
 			Nokia5110_Clear();
-			Nokia5110_SetCursor(1, 2);
+			Nokia5110_SetCursor(2, 2);
 			Nokia5110_OutString("GAME OVER");
 			level = 1;											// back to level 1 when the player died
-			Delayms(500);
+			Delayms(300);
 			continue;
 		}		
 		if (number_of_Enemies  == 0){				// display enemeis and player for the first time
-			//** block to handle displaying current  level
+			//****  block to handle displaying current  level ****//
 			Nokia5110_Clear();
 			Nokia5110_SetCursor(3, 2);
 			String[6]=level+0x30;
@@ -343,11 +319,10 @@ int main (void){
 				Enemy[i].image = characters[i];
 				Enemy[i].life = 0;					// enemies start as dead
 			}
-			///// block to handle first level's enemies choice and display. We shuffle the shuffle array to get us random enemy sequence
-			// bad_guy array will only have level number of elements meaningful
+			//**** block to handle first level's enemies choice and display. We shuffle the shuffle array to get us random enemy sequence
+			// bad_guy array will only have level number of elements meaningful ****//
 			for (t=0;t<level;t++){
-				Enemy_Rand = Rand(1,5);						// first enemy creation
-				Enemy_Rand--;		
+				Enemy_Rand = Rand(1,5)-1;						// first enemy creation
 				tmp = shuffle[t];
 				shuffle[t] = shuffle[Enemy_Rand];
 				shuffle[Enemy_Rand] = tmp;
@@ -368,9 +343,23 @@ int main (void){
 			display(35,Player_image);					// value of i doesn't matter for the first time
 			continue;							// skip to the next iteration
 		}
-		Player_Loc = Player_Move();
-	
-		///// block to handle when the player fires a missile
+		Player_Loc = Player_Move();						// move the player according to ADC result
+		if (Player_Loc == heart_loc){
+			if (Player_life <3){
+				Player_life++;
+			}
+			heart_flag = false;
+		}
+		//**** handle heart appearance ****//
+		if (heart_flag == false){
+			heart_Rand = Rand(1,50)-1;
+			if ((heart_Rand%7)==0){							// randomize heart appearance
+				heart_flag = true;
+				heart_Rand = Rand(1,5)-1;					// randomize heart location
+				heart_loc = 16*heart_Rand;				// set heart location
+			}
+		}
+		//**** block to handle when the player fires a missile ****//
 		if (enemy_hit_flag ==1){	// when a missile is firing
 			///// block to handle first time a missile is fired
 			if (missile_flag == false){
@@ -378,13 +367,13 @@ int main (void){
 				missile_loc = Player_Loc+7;
 				missile_flag = true;
 			}
-			///// block to handles enemy explosion
+			//**** block to handles enemy explosion ****//
 			if (explosion_flag == 6){ // when an enemy is hit
 				for (t=0;t<level;t++){
 					if ((Enemy[bad_guy[t]].life == 1) &&(missile_loc >= Enemy[bad_guy[t]].x)&&(missile_loc <= Enemy[bad_guy[t]].x+15) &&
 						((48-i) <= Enemy[bad_guy[t]].y+10)){
 						Enemy[bad_guy[t]].image = SmallExplosion0;
-						explosion_flag = true;
+						explode_flag = true;
 						missile_flag = false;
 						explosion_flag = bad_guy[t];
 						enemy_hit_flag = 2;	
@@ -392,7 +381,7 @@ int main (void){
 					}
 				}
 			}
-			///// block to handle moving missiles
+			//**** block to handle moving missiles ****//
 		  if (i> 35){							// if the missile reached the top
 				i = 13;
 				enemy_hit_flag = 0;
@@ -402,8 +391,8 @@ int main (void){
 				i += 5;
 			}
 		}
-			///// block to handle after explosion. No enemy shown
-		else if(enemy_hit_flag == 2){			//!!!!!!! make it back to 0 in the next level
+			//**** block to handle after explosion. No enemy shown ****//
+		else if(enemy_hit_flag == 2){		
 			Enemy[explosion_flag].life = 0;
 			missile_flag = false;
 			explosion_flag = 6;					// reset explosion flag to finish explosion
@@ -411,7 +400,7 @@ int main (void){
 			number_of_Enemies--;							// decrease number of enemies in a level
 			all_dead_flag--;									// decrement the dead flag
 		}
-		///// block to handle enemy movements
+		//**** block to handle enemy movements ****//
 		else{ 					// move enemy if a missile is not fired
 			enemy_move_flag = Rand(0,10);
 			if ((enemy_move_flag%5) == 0){						// move enemy around
@@ -446,7 +435,7 @@ int main (void){
 			else{																			// move an enemy to attack
 				if (n == ENEMY10H-1){											// first time checking for an attack
 					enemy_attack_flag = Rand(0,100);				// randomize the enemy movement
-					if ((enemy_attack_flag%10) == 0){				// enemy attacks
+					if ((enemy_attack_flag%11) == 0){				// enemy attacks (more random)
 						do{
 						enemy_attack_flag = Rand(1,5)-1;				// randomize which enemy attacks
 						}while (Enemy[bad_guy[enemy_attack_flag]].life != 1);
@@ -468,9 +457,6 @@ int main (void){
 					}
 				}
 				switch (Player_life){
-					case 3: 
-						Player_image = PlayerSheildCatNew;
-						break;
 					case 2:
 						Player_image = PlayerBrokenSheildCatNew;
 						break;
@@ -479,12 +465,16 @@ int main (void){
 						break;
 					case 0:
 						Player_image = SmallExplosion0;
+					  explode_flag = true;
 						break;
+					default:
+						Player_image = PlayerSheildCatNew;
 				}
 			}
 		}
 		display(i,Player_image);
-		Delayms(50);  					//!!!! for board: 200         
+		Delayms(200);  					        
+		explode_flag = false;
 		//**** block to check if player is ready to go to the next level ****//
 		if (all_dead_flag == 0){	// increment the level when all enemies are dead
 			if(level !=5){				// increment when the level is not the last level
@@ -495,14 +485,22 @@ int main (void){
 		}
 	}
 }
-
+// **************display**************************
+// function that displays player, enemy/ies, missile, and heart as a life booster
+// Input: i: variable for missile y location
+//				image: variable to display player's character(with/without broken/complete sheild)
+// Output: none
+// Note: we iterate through all 5 enemies and dispplay the ones that are alive
+//			we check the flags for missile and heart and display them if they are set
 void display(unsigned int i,const unsigned char* image){
 		int t;
+		if (heart_flag == true){
+			Nokia5110_PrintBMP(heart_loc, 45, heart, 0);
+		}
 		Nokia5110_PrintBMP(Player_Loc, 47, image, 0);
 		if (missile_flag == true){
 			Nokia5110_PrintBMP(missile_loc, 48-i, missile_image, 0);
 		}
-		//Nokia5110_PrintBMP(60, 45, heart, 1);
 		for (t=0;t<5;t++){
 			if (Enemy[t].life == 1){
 				Nokia5110_PrintBMP(Enemy[t].x, Enemy[t].y, Enemy[t].image,0);
@@ -510,7 +508,12 @@ void display(unsigned int i,const unsigned char* image){
 		}
 		Nokia5110_DisplayBuffer(); // draw buffer
 }
-
+// **************enemy_Movement*********************
+// function that move enimeis randomly 
+// Input: t: the current enemy
+//				RorL: a flag to move the enemy right or left
+// Output: none
+// Note: for the current enemy, we check all 5 enemies positions and check if they are neignboring the current enemy
 void enemy_Movement(unsigned char t, bool RorL){
 	unsigned char tmp;
 	unsigned char check_enemy = 0;
@@ -780,7 +783,7 @@ void Timer2A_Handler(void){
 		GPIO_PORTB_DATA_R = 0x00;		
 		Index_N = Index_S = 0;						// reset indeces
 	}
-	if (explosion_flag == true){
+	if (explode_flag == true){
 		if (Index_Ex < 8731){							// 8731 is the size of the explosion array
 			Index_Ex = (Index_Ex+1)&0x3FFF;		// 0x3FFF would cycle over the 4080 table
 			DAC_Out(explosion[Index_Ex]);				// output the sine wave value to DAC
